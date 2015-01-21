@@ -1,0 +1,22 @@
+PANDOC=pandoc
+DVIPDFMX=dvipdfmx
+PLATEX=platex
+
+PANDOC_FLAG=-f markdown -t latex --tab-stop=2 --listings --toc
+DVIPDFMX_FLAG=-p a4 -q
+PLATEX_FLAG=-kanji=utf8 -shell-escape -sjis-terminal -interaction=nonstopmode
+
+MdTeX(file, template) =
+	$(file).tex: $(file).md $(template).tex
+		$(PANDOC) $(PANDOC_FLAG) --template=$(template).tex $(file).md > $(file).tex
+
+	$(file).dvi: $(file).tex
+		$(PLATEX) $(PLATEX_FLAG) $(file)
+
+	$(file).pdf: $(file).dvi
+		$(DVIPDFMX) $(DVIPDFMX_FLAG) $(file).dvi
+	
+	value $(file).pdf
+%.pdf: %.md
+	$(MdTeX $*, template)
+.DEFAULT: $(MdTeX report, template)
